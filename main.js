@@ -18,7 +18,7 @@ Set.prototype.difference = function(setB) {
   return difference;
 }
 
-appURL = "http://huxley-11.apphb.com/"
+appURL = "https://huxley-11.apphb.com/"
 accessToken = "4b1741f4-a446-4337-bbf3-3d5ac58dc331";
 board = "departure";
 crs = "CBG";
