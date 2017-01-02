@@ -118,7 +118,9 @@ cheeseBoard.controller('cheeseBoardController',
     for (var i in filterStationName) {
       var new_url = url.replace("filterStationName", filterStationName[i])
       $.get(new_url, function( data ) {
-        new_resp = new_resp.concat(data.trainServices);
+        if (data.trainServices != null) {
+          new_resp = new_resp.concat(data.trainServices);
+        }
         result_count++;
 
         if (result_count === filterStationName.length) {
