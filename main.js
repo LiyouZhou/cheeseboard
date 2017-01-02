@@ -79,7 +79,7 @@ cheeseBoard.controller('cheeseBoardController',
     var addSet = newListHashSet.difference(oldListHashSet);
     var removeSet = oldListHashSet.difference(newListHashSet);
 
-    for (const val of updateSet) {
+    for (let val of updateSet) {
       var old_index = oldListHash.indexOf(val);
       var new_index = newListHash.indexOf(val);
 
@@ -92,7 +92,7 @@ cheeseBoard.controller('cheeseBoardController',
       }
     }
 
-    for (const val of removeSet) {
+    for (let val of removeSet) {
       var index = oldListHash.indexOf(val);
       if (index > -1) {
         oldListHash.splice(index, 1);
@@ -100,7 +100,7 @@ cheeseBoard.controller('cheeseBoardController',
       }
     }
 
-    for (const val of addSet) {
+    for (let val of addSet) {
       var index = newListHash.indexOf(val);
       if (index > -1) {
         oldList.push(newList[index]);
