@@ -2,6 +2,7 @@
 <html ng-app="cheeseBoard">
 <head>
   <meta charset="utf-8">
+  <title>Cheese Board: Services from Cambridge</title>
   <script src="bower_components/jquery/dist/jquery.js"></script>
   <script src="bower_components/flapper/src/jquery.flapper.js"></script>
   <script src="bower_components/jquery.soap/jquery.soap.js"></script>
@@ -10,7 +11,8 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
   <script src="sample_response.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
-  <title></title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   <style>
   .flapper{
     display: inline;
@@ -21,7 +23,7 @@
   body {
     background-color: #000000
   }
-  h1 {
+  .top-header {
     color: #ffcf00;
     font-family: 'Montserrat', sans-serif;
   }
@@ -30,22 +32,32 @@
   }
   </style>
 </head>
-<body ng-controller="cheeseBoardController">
-  <h1>Services from Cambridge {{date | date:'HH:mm:ss'}}</h1>
-  <train-service width="11" class="XS light">Destination</train-service>
-  <train-service width="5" class="XS light">Time</train-service>
-  <train-service width="5" class="XS light">arr</train-service>
-  <train-service width="7" class="XS light">Status</train-service>
-  <train-service width="4" class="XS light">Plat</train-service>
-  <hr></hr>
+<body ng-controller="cheeseBoardController" class="container-fluid">
+  <h2 class="top-header">Current Time {{date | date:'HH:mm:ss'}}</h2>
 
-  <div ng-repeat="service in resp|orderBy : 'std'">
-    <train-service width="11" class="XS">{{processStnName(service.destName)}}</train-service>
-    <train-service width="5" class="XS">{{service.std}}</train-service>
-    <train-service width="5" class="XS">{{service.arrivalTime}}</train-service>
-    <train-service width="7" class="XS">{{service.etd}}</train-service>
-    <train-service width="1" class="XS">{{service.platform}}</train-service>
-    <hr></hr>
-  </div>
+  <table class="table table-inverse">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>Destination</th>
+        <th>Expected</th>
+        <th>Plat</th>
+        <th>Arrive</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr ng-repeat="service in resp|orderBy : 'std'">
+        <td>{{service.std}}</td>
+        <td>{{processStnName(service.destName)}}</td>
+        <td>{{service.etd}}</td>
+        <td>{{service.platform}}</td>
+        <td>{{service.arrivalTime}}</td>
+      </tr>
+      <tr>
+        <th ng-show="resp.length===0">No further service today</th>
+      </tr>
+    </tbody>
+  </table>
 </body>
 </html>

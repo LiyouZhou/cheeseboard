@@ -126,9 +126,9 @@ cheeseBoard.controller('cheeseBoardController',
         if (result_count === filterStationName.length) {
           for (var i in new_resp) {
             var service = new_resp[i];
-            console.log(service.std, service.destName);
             service.arrivalTime = service.subsequentCallingPoints[0].callingPoint[service.subsequentCallingPoints[0].callingPoint.length-1].st;
             service.destName = service.destination[0].locationName;
+            console.log(service.std, service.destName);
           }
 
           diffServices(new_resp);
