@@ -1143,3 +1143,24 @@ var sample_response = {
   "platformAvailable": true,
   "areServicesAvailable": true
 };
+
+var sample_response_next = jQuery.extend(true, {}, sample_response);
+
+var s = sample_response_next.trainServices;
+s.pop();
+s[s.length-1].platform = 128;
+s[s.length-2].std = "11:11";
+
+for (var i in s) {
+  var service = s[i];
+  service.arrivalTime = service.subsequentCallingPoints[0].callingPoint[service.subsequentCallingPoints[0].callingPoint.length-1].st;
+  service.destName = service.destination[0].locationName;
+  console.log(service.std, service.destName);
+}
+
+for (var i in sample_response.trainServices) {
+  var service = sample_response.trainServices[i];
+  service.arrivalTime = service.subsequentCallingPoints[0].callingPoint[service.subsequentCallingPoints[0].callingPoint.length-1].st;
+  service.destName = service.destination[0].locationName;
+  console.log(service.std, service.destName);
+}

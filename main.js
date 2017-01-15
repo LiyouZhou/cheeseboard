@@ -79,15 +79,16 @@ cheeseBoard.controller('cheeseBoardController',
     var addSet = newListHashSet.difference(oldListHashSet);
     var removeSet = oldListHashSet.difference(newListHashSet);
 
+    // console.log(updateSet, addSet, removeSet);
     for (let val of updateSet) {
       var old_index = oldListHash.indexOf(val);
       var new_index = newListHash.indexOf(val);
 
-      if (oldList[old_index].etd === newList[new_index].etd) {
+      if (oldList[old_index].etd !== newList[new_index].etd) {
         oldList[old_index].etd = newList[new_index].etd;
       }
 
-      if (oldList[old_index].platform === newList[new_index].platform) {
+      if (oldList[old_index].platform !== newList[new_index].platform) {
         oldList[old_index].platform = newList[new_index].platform;
       }
     }
@@ -106,8 +107,21 @@ cheeseBoard.controller('cheeseBoardController',
         oldList.push(newList[index]);
       }
     }
+  }
 
-    console.log(oldList);
+  $scope.minutesFromNow = function (time) {
+    time = time.split(":");
+    var d  = new Date();
+    d.setMinutes(time[1]);
+    d.setHours(time[0]);
+
+    var now = new Date();
+    var time_diff = d - now;
+
+    if (time_diff < -2*60*60*1000)
+      time_diff += 24*60*60*1000;
+
+    return "(in " + time_diff/1000/60 + " min)";
   }
 
   function page_refresh() {
@@ -138,8 +152,12 @@ cheeseBoard.controller('cheeseBoardController',
     }
   }
 
-  page_refresh();
-  $interval(page_refresh, 10000);
+  diffServices(sample_response.trainServices);
+  diffServices(sample_response_next.trainServices);
+  console.log($scope.resp);
+
+  // page_refresh();
+  // $interval(page_refresh, 10000);
 
   $scope.date = new Date();
   $interval(function() {
@@ -164,25 +182,39 @@ cheeseBoard.controller('cheeseBoardController',
     return stnName;
   }
 
-});
-
-cheeseBoard.directive("trainService", function() {
-  function link(scope, element, attrs) {
-    options.width = attrs.width;
-    scope.flapboard = angular.element(element[0]).flapper(options);
-    scope.$watch(function() {
-      return element[0].innerText;
-    }, function(newValue, oldValue) {
-      console.log('new', newValue, 'old', oldValue);
-      scope.flapboard.val(element[0].innerText).change();
-    });
+  row_per_page = 2;
+  $scope.active_page = 0;
+  $scope.active_page_inc = function() {
+    $scope.active_page += 1;
+    $scope.active_page %= $scope.num_pages;
   }
 
-  return {
-    scope: true,
-    restrict : "E",
-    link: link
-  };
+  $scope.active_page_dec = function() {
+    if ($scope.active_page > 0)
+    {
+      $scope.active_page -= 1;
+    }
+  }
+
+  $interval($scope.active_page_inc, 5000);
+
+  $scope.num_pages = 1;
+  $scope.getNumber = function(num) {
+    return new Array(num);
+  }
+
+  $scope.$watch("resp.length", function () {
+    $scope.num_pages = Math.ceil($scope.resp.length/row_per_page);
+  });
+
+  $scope.showService = function (index) {
+    console.log();
+    return Math.floor(index/row_per_page) === $scope.active_page;
+  }
+
+  $scope.settings = function () {
+    console.log("printed");
+  }
 });
 
 });

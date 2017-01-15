@@ -4,22 +4,14 @@
   <meta charset="utf-8">
   <title>Cheese Board: Services from Cambridge</title>
   <script src="bower_components/jquery/dist/jquery.js"></script>
-  <script src="bower_components/flapper/src/jquery.flapper.js"></script>
-  <script src="bower_components/jquery.soap/jquery.soap.js"></script>
   <script src="main.js"></script>
-  <link href="bower_components/flapper/css/flapper.css" type="text/css" rel="stylesheet" />
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
   <script src="sample_response.js"></script>
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/4.4.0/font/octicons.css" integrity="sha256-4y5taf5SyiLyIqR9jL3AoJU216Rb8uBEDuUjBHO9tsQ=" crossorigin="anonymous" />
   <style>
-  .flapper{
-    display: inline;
-    margin-right: 30px;
-    font-weight: bolder;
-    font-family: 'Montserrat', sans-serif;
-  }
   body {
     background-color: #000000
   }
@@ -27,28 +19,29 @@
     color: #ffcf00;
     font-family: 'Montserrat', sans-serif;
   }
-  .flapper.XS:not(.light) .digit div {
-    color: #ffcf00;
+  .white {
+    color: #fff;
   }
   </style>
 </head>
 <body ng-controller="cheeseBoardController" class="container-fluid">
+
   <h2 class="top-header">Current Time {{date | date:'HH:mm:ss'}}</h2>
 
   <table class="table table-inverse">
     <thead>
       <tr>
         <th>Time</th>
-        <th>Destination</th>
-        <th>Expected</th>
+        <th>Dest</th>
+        <th>Exp</th>
         <th>Plat</th>
-        <th>Arrive</th>
+        <th>ETA</th>
       </tr>
     </thead>
 
     <tbody>
-      <tr ng-repeat="service in resp|orderBy : 'std'">
-        <td>{{service.std}}</td>
+      <tr ng-repeat="service in resp track by service.std|orderBy : 'std'" ng-show="showService($index)">
+        <td>{{service.std}} <a ng-show="service.platform">{{minutesFromNow(service.std)}}</a></td>
         <td>{{processStnName(service.destName)}}</td>
         <td>{{service.etd}}</td>
         <td>{{service.platform}}</td>
@@ -59,5 +52,25 @@
       </tr>
     </tbody>
   </table>
+
+  <nav aria-label="..." class="fixed-bottom">
+    <ul class="pagination pagination-sm">
+      <li class="page-item" ng-class="{disabled: active_page === 0}" href="#">
+        <span class="page-link" ng-click="active_page_dec()">&lt;</span>
+      </li>
+      <li ng-repeat="i in getNumber(num_pages) track by $index" class="page-item" ng-class="{'active' : active_page === $index}">
+        <a class="page-link" href="#">
+          {{$index+1}}
+        </a>
+      </li>
+      <li class="page-item" ng-class="{disabled: active_page === num_pages-1}">
+        <a class="page-link" ng-click="active_page_inc()" href="#">&gt;</a>
+      </li>
+    </ul>
+  </nav>
+
+  <button class="btn btn-default" ng-click="settings()">
+    <span class="octicon octicon-gear white"></span>
+  </button>
 </body>
 </html>
