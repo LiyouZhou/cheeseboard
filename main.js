@@ -1,5 +1,16 @@
 $(function() {
 
+var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
+  'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
+  'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+  'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
+  'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
+  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
+  'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
+  'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
+  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
+];
+
 Set.prototype.intersection = function(setB) {
   var intersection = new Set();
   for (var elem of setB) {
@@ -18,15 +29,13 @@ Set.prototype.difference = function(setB) {
   return difference;
 }
 
-appURL = "https://huxley-11.apphb.com/"
+appURL = "https://huxley-11.apphb.com"
 accessToken = "4b1741f4-a446-4337-bbf3-3d5ac58dc331";
-board = "departure";
-crs = "CBG";
 filterType = "to";
-filterStationName = ["KGX","LST"];
 numRows = 10;
 expand = true;
-url = `${appURL}${board}/${crs}/${filterType}/filterStationName/${numRows}?accessToken=${accessToken}&expand=${expand}`;
+// url = `${appURL}${board}/${crs}/${filterType}/filterStationName/${numRows}?accessToken=${accessToken}&expand=${expand}`;
+var url_opts = `?accessToken=${accessToken}&expand=${expand}`
 
 var options = {
   width: 5,             // number of digits
@@ -49,9 +58,11 @@ var cheeseBoard = angular.module('cheeseBoard', []);
 
 cheeseBoard.controller('cheeseBoardController',
   function cheeseBoardController($scope, $interval) {
-
+  $scope.crs = "CBG";
+  $scope.filterStationName = ["KGX","LST"];
+  $scope.board = "departure";
   $scope.resp = [];
-  console.log(url);
+  // console.log(url);
 
   function arrayUnique(array) {
       var a = array.concat();
@@ -129,15 +140,19 @@ cheeseBoard.controller('cheeseBoardController',
     console.log("refresh");
     var result_count = 0;
 
-    for (var i in filterStationName) {
-      var new_url = url.replace("filterStationName", filterStationName[i])
+    for (var i in $scope.filterStationName) {
+      // url = `${appURL}${board}/${crs}/${filterType}/filterStationName/${numRows};
+
+      var new_url = [appURL, $scope.board, $scope.crs, filterType,
+                     $scope.filterStationName[i], numRows].join("/") + url_opts;
+      console.log(new_url);
       $.get(new_url, function( data ) {
         if (data.trainServices != null) {
           new_resp = new_resp.concat(data.trainServices);
         }
         result_count++;
 
-        if (result_count === filterStationName.length) {
+        if (result_count === $scope.filterStationName.length) {
           for (var i in new_resp) {
             var service = new_resp[i];
             service.arrivalTime = service.subsequentCallingPoints[0].callingPoint[service.subsequentCallingPoints[0].callingPoint.length-1].st;
@@ -152,12 +167,12 @@ cheeseBoard.controller('cheeseBoardController',
     }
   }
 
-  diffServices(sample_response.trainServices);
-  diffServices(sample_response_next.trainServices);
-  console.log($scope.resp);
+  // diffServices(sample_response.trainServices);
+  // diffServices(sample_response_next.trainServices);
+  // console.log($scope.resp);
 
-  // page_refresh();
-  // $interval(page_refresh, 10000);
+  page_refresh();
+  $interval(page_refresh, 10000);
 
   $scope.date = new Date();
   $interval(function() {
@@ -215,6 +230,20 @@ cheeseBoard.controller('cheeseBoardController',
   $scope.settings = function () {
     console.log("printed");
   }
+
+  // $('#myModal').modal('show');
+
+  $('#add-dest-filter').tooltip();
+
+  $.get(appURL+"/"+"crs", function( data ) {
+    for(var i in data){
+      data[i] = data[i].stationName + " (" + data[i].crsCode + ")";
+    }
+    $('.typeahead').typeahead({
+      source: data
+    });
+  });
+
 });
 
 });

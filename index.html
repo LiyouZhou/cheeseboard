@@ -5,12 +5,15 @@
   <title>Cheese Board: Services from Cambridge</title>
   <script src="bower_components/jquery/dist/jquery.js"></script>
   <script src="main.js"></script>
-  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
   <script src="sample_response.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.6/angular.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/css/tether.min.css" />
   <link href="https://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/octicons/4.4.0/font/octicons.css" integrity="sha256-4y5taf5SyiLyIqR9jL3AoJU216Rb8uBEDuUjBHO9tsQ=" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-3-typeahead/4.0.2/bootstrap3-typeahead.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
   <style>
   body {
     background-color: #000000
@@ -69,8 +72,66 @@
     </ul>
   </nav>
 
-  <button class="btn btn-default" ng-click="settings()">
+  <button class="btn btn-default" data-toggle="modal" data-target="#myModal">
     <span class="octicon octicon-gear white"></span>
   </button>
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Cheese Board Settings</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio1" value="departure" checked="checked">
+                Departure
+              </label>
+            </div>
+            <div class="form-check form-check-inline">
+              <label class="form-check-label">
+                <input class="form-check-input" type="radio" name="inlineRadioOptions" id="inlineRadio2" value="arrival">
+                Arrival
+              </label>
+            </div>
+
+            <div class="form-group row">
+              <label for="example-text-input" class="col-2 col-form-label">From</label>
+              <div class="col-10">
+                <input class="form-control typeahead" type="text" placeholder="Station Code or Name" id="from-station-text-input" autocomplete="off">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label for="to-station-text-input" class="col-2 col-form-label">To</label>
+              <div class="col-8">
+                <input class="form-control typeahead" type="text" placeholder="Optional Station Code or Name" id="to-station-text-input" autocomplete="off">
+              </div>
+              <button type="button" class="btn btn-default" id="add-dest-filter" title="Add more destination filter">
+                <span aria-hidden="true">+</span>
+              </button>
+            </div>
+
+            <div class="form-group row">
+              <label for="rows_per_page" class="col-8 col-form-label">Number of rows per page</label>
+              <div class="col-4">
+                <input class="form-control" type="number" id="rows_per_page" min="0" value="4">
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Save changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
