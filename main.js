@@ -227,22 +227,53 @@ cheeseBoard.controller('cheeseBoardController',
     return Math.floor(index/row_per_page) === $scope.active_page;
   }
 
-  $scope.settings = function () {
-    console.log("printed");
+  $scope.save_settings = function (settings) {
+    $scope.settingsError = undefined;
+
+    if($scope.stationNames.indexOf($scope.settings.from)<0){
+      $scope.settings.from = "invalid";
+      $scope.settingsError = "From Station Name Invalid";
+      return;
+    }
+
+    if($scope.stationNames.indexOf($scope.settings.to)<0){
+      $scope.settings.to = "invalid";
+      $scope.settingsError = "To Station Name Invalid";
+      return;
+    }
+
+    if($scope.settings.rowPerPage === null)
+    {
+      $scope.settings.rowPerPage = row_per_page;
+    }
+
+    console.log(settings);
+    localStorage.setItem('settings', JSON.stringify(settings));
+    $('#myModal').modal('hide');
   }
 
   // $('#myModal').modal('show');
 
   $('#add-dest-filter').tooltip();
 
+  $scope.stationNames = [];
   $.get(appURL+"/"+"crs", function( data ) {
     for(var i in data){
-      data[i] = data[i].stationName + " (" + data[i].crsCode + ")";
+      $scope.stationNames[i] = data[i].stationName + " (" + data[i].crsCode + ")";
     }
     $('.typeahead').typeahead({
-      source: data
+      source: $scope.stationNames
     });
   });
+
+  if (localStorage.settings != undefined){
+    $scope.settings = JSON.parse(localStorage.settings);
+  }
+  else{
+    $scope.settings = {};
+    $scope.settings.board = "departure";
+    settings.rowPerPage = 4;
+  }
 
 });
 
