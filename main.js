@@ -59,7 +59,6 @@ var cheeseBoard = angular.module('cheeseBoard', []);
 cheeseBoard.controller('cheeseBoardController',
   function cheeseBoardController($scope, $interval) {
   $scope.crs = "CBG";
-  $scope.filterStationName = ["KGX","LST"];
   $scope.board = "departure";
   $scope.resp = [];
   // console.log(url);
@@ -140,19 +139,29 @@ cheeseBoard.controller('cheeseBoardController',
     console.log("refresh");
     var result_count = 0;
 
-    for (var i in $scope.filterStationName) {
+    var filterStationName = angular.copy($scope.settings.destFilters);
+
+    if (filterStationName === undefined || filterStationName.length === 0) {
+      filterStationName.push('')
+    }
+
+    for (var i in filterStationName) {
       // url = `${appURL}${board}/${crs}/${filterType}/filterStationName/${numRows};
 
-      var new_url = [appURL, $scope.board, $scope.crs, filterType,
-                     $scope.filterStationName[i], numRows].join("/") + url_opts;
+      var new_url = [appURL, $scope.board, $scope.crs]
+      if (filterStationName[i] !== '') {
+        new_url.push(filterType, filterStationName[i]);
+      }
+      new_url.push(numRows);
+
       console.log(new_url);
-      $.get(new_url, function( data ) {
+      $.get(new_url.join("/") + url_opts, function( data ) {
         if (data.trainServices != null) {
           new_resp = new_resp.concat(data.trainServices);
         }
         result_count++;
 
-        if (result_count === $scope.filterStationName.length) {
+        if (result_count === filterStationName.length) {
           for (var i in new_resp) {
             var service = new_resp[i];
             service.arrivalTime = service.subsequentCallingPoints[0].callingPoint[service.subsequentCallingPoints[0].callingPoint.length-1].st;
@@ -170,9 +179,6 @@ cheeseBoard.controller('cheeseBoardController',
   // diffServices(sample_response.trainServices);
   // diffServices(sample_response_next.trainServices);
   // console.log($scope.resp);
-
-  page_refresh();
-  $interval(page_refresh, 10000);
 
   $scope.date = new Date();
   $interval(function() {
@@ -197,7 +203,7 @@ cheeseBoard.controller('cheeseBoardController',
     return stnName;
   }
 
-  row_per_page = 2;
+  var row_per_page = 2;
   $scope.active_page = 0;
   $scope.active_page_inc = function() {
     $scope.active_page += 1;
@@ -218,6 +224,10 @@ cheeseBoard.controller('cheeseBoardController',
     return new Array(num);
   }
 
+  $scope.stationNameValid = function(stationName) {
+    return $scope.stationNames.indexOf(stationName) >= 0;
+  }
+
   $scope.$watch("resp.length", function () {
     $scope.num_pages = Math.ceil($scope.resp.length/row_per_page);
   });
@@ -225,6 +235,14 @@ cheeseBoard.controller('cheeseBoardController',
   $scope.showService = function (index) {
     console.log();
     return Math.floor(index/row_per_page) === $scope.active_page;
+  }
+
+  var refreshPromise = undefined;
+  function startRefresh() {
+    if (refreshPromise === undefined) {
+      page_refresh();
+      refreshPromise = $interval(page_refresh, 10000);
+    }
   }
 
   $scope.save_settings = function (settings) {
@@ -236,45 +254,70 @@ cheeseBoard.controller('cheeseBoardController',
       return;
     }
 
-    if($scope.stationNames.indexOf($scope.settings.to)<0){
-      $scope.settings.to = "invalid";
-      $scope.settingsError = "To Station Name Invalid";
-      return;
+    for (var i in $scope.settings.destFilters) {
+      if($scope.settings.to !== '' && $scope.stationNames.indexOf($scope.settings.to)<0){
+        $scope.settings.to = "invalid";
+        $scope.settingsError = "To Station Name Invalid";
+        return;
+      }
     }
 
-    if($scope.settings.rowPerPage === null)
-    {
+    if($scope.settings.rowPerPage === null) {
       $scope.settings.rowPerPage = row_per_page;
     }
 
     console.log(settings);
     localStorage.setItem('settings', JSON.stringify(settings));
     $('#myModal').modal('hide');
+
+    $scope.crs = $scope.settings.from.slice(-4,-1);
+    row_per_page = $scope.settings.rowPerPage;
+    $scope.board = $scope.settings.board;
+
+    startRefresh();
   }
 
-  // $('#myModal').modal('show');
-
-  $('#add-dest-filter').tooltip();
+  $scope.initTypeAhead = function () {
+    $('.typeahead').typeahead({
+      source: $scope.stationNames
+    });
+  }
 
   $scope.stationNames = [];
   $.get(appURL+"/"+"crs", function( data ) {
     for(var i in data){
       $scope.stationNames[i] = data[i].stationName + " (" + data[i].crsCode + ")";
     }
-    $('.typeahead').typeahead({
-      source: $scope.stationNames
-    });
+    $scope.initTypeAhead();
   });
+
+  localStorage.clear();
 
   if (localStorage.settings != undefined){
     $scope.settings = JSON.parse(localStorage.settings);
+    startRefresh();
   }
   else{
     $scope.settings = {};
     $scope.settings.board = "departure";
-    settings.rowPerPage = 4;
+    $scope.settings.rowPerPage = 4;
+    $scope.settings.destFilters = [];
+    $('#myModal').modal('show');
   }
 
+});
+
+cheeseBoard.directive('crs', function() {
+  return {
+    require: 'ngModel',
+    scope: false,
+    link: function(scope, elm, attrs, ctrl) {
+      ctrl.$validators.crs = function(modelValue, viewValue) {
+        console.log(modelValue, viewValue, ctrl.$isEmpty(modelValue), scope.stationNameValid(modelValue));
+        return ctrl.$isEmpty(modelValue) || scope.stationNameValid(modelValue);
+      };
+    }
+  };
 });
 
 });
