@@ -43,7 +43,8 @@
     </thead>
 
     <tbody>
-      <tr ng-repeat="service in resp track by service.std|orderBy : 'std'" ng-show="showService($index)">
+      <tr ng-repeat="service in resp track by service.std|orderBy : 'std'"
+          ng-show="showService($index)">
         <td>{{service.std}} <a ng-show="service.platform">{{minutesFromNow(service.std)}}</a></td>
         <td>{{processStnName(service.destName)}}</td>
         <td>{{service.etd}}</td>
@@ -61,7 +62,8 @@
       <li class="page-item" ng-class="{disabled: active_page === 0}" href="#">
         <span class="page-link" ng-click="active_page_dec()">&lt;</span>
       </li>
-      <li ng-repeat="i in getNumber(num_pages) track by $index" class="page-item" ng-class="{'active' : active_page === $index}">
+      <li ng-repeat="i in getNumber(num_pages) track by $index" class="page-item"
+          ng-class="{'active' : active_page === $index}">
         <a class="page-link" href="#">
           {{$index+1}}
         </a>
@@ -77,7 +79,7 @@
   </button>
 
   <!-- Modal -->
-  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog">
     <div class="modal-dialog" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -87,40 +89,63 @@
           </button>
         </div>
         <div class="modal-body">
-          <div class="alert alert-danger" role="alert" ng-show="settingsError != undefined">{{settingsError}}</div>
-          <form name="settings" class="css-form" novalidate>
+          <div class="alert alert-danger" role="alert"
+               ng-show="settingsError != undefined">{{settingsError}}</div>
+          <form name="set" novalidate>
             <div class="form-check form-check-inline">
               <label class="form-check-label">
-                <input class="form-check-input" type="radio" value="departure" ng-model="settings.board">
+                <input class="form-check-input" type="radio" value="departures" ng-model="settings.board">
                 Departure
               </label>
             </div>
             <div class="form-check form-check-inline">
               <label class="form-check-label">
-                <input class="form-check-input" type="radio" value="arrival" ng-model="settings.board">
+                <input class="form-check-input" type="radio" value="arrivals" ng-model="settings.board">
                 Arrival
               </label>
             </div>
 
-            <div class="form-group row"  ng-class="{'has-danger': settings.from.$error.crs}">
-              <label for="example-text-input" class="col-2 col-form-label">From</label>
+            <div class="form-group row"
+                 ng-class="{'has-danger': set.from.$error.crs}">
+              <label for="example-text-input" class="col-2 col-form-label">
+                From
+              </label>
               <div class="col-10">
-                <input class="form-control typeahead" type="text" placeholder="Station Code or Name" autocomplete="off" ng-model="from" name="from" crs>
+                <input class="form-control typeahead"
+                       type="text"
+                       placeholder="Station Code or Name"
+                       autocomplete="off"
+                       ng-model="settings.from"
+                       name="from"
+                       crs>
               </div>
             </div>
 
-            <div class="form-group row"  ng-repeat="filter in settings.destFilters track by $index">
-              <label for="to-station-text-input" class="col-2 col-form-label">To</label>
+            <div class="form-group row"
+                 ng-repeat="filter in settings.destFilters track by $index"
+                 ng-class="{'has-danger': set.to{{$index}}.$error.crs}">
+              <label for="to-station-text-input" class="col-2 col-form-label">
+                To
+              </label>
               <div class="col-8">
-                <input class="form-control typeahead" type="text" placeholder="Optional Station Code or Name" autocomplete="off" ng-model="settings.destFilters[$index]" ng-init="initTypeAhead()">
+                <input class="form-control typeahead"
+                       type="text"
+                       placeholder="Optional Station Code or Name"
+                       autocomplete="off"
+                       ng-model="settings.destFilters[$index]"
+                       ng-init="initTypeAhead()"
+                       name="to{{$index}}"
+                       crs>
               </div>
-              <button type="button" class="btn btn-default" id="add-dest-filter" title="Add more destination filter" ng-click="settings.destFilters.splice($index,1)">
+              <button type="button" class="btn btn-default"
+                      ng-click="settings.destFilters.splice($index,1)">
                 <span aria-hidden="true">-</span>
               </button>
             </div>
 
             <div class="form-group row">
-              <button type="button" class="btn btn-default col-8" id="add-dest-filter" title="Add more destination filter" ng-click="settings.destFilters.push('')">
+              <button type="button" class="btn btn-default col-8"
+                      ng-click="settings.destFilters.push('')">
                 <span aria-hidden="true">add destination filter</span>
               </button>
             </div>

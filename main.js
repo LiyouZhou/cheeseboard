@@ -1,16 +1,4 @@
 $(function() {
-
-var states = ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California',
-  'Colorado', 'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii',
-  'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
-  'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota',
-  'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire',
-  'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota',
-  'Ohio', 'Oklahoma', 'Oregon', 'Pennsylvania', 'Rhode Island',
-  'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont',
-  'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming'
-];
-
 Set.prototype.intersection = function(setB) {
   var intersection = new Set();
   for (var elem of setB) {
@@ -34,34 +22,15 @@ accessToken = "4b1741f4-a446-4337-bbf3-3d5ac58dc331";
 filterType = "to";
 numRows = 10;
 expand = true;
-// url = `${appURL}${board}/${crs}/${filterType}/filterStationName/${numRows}?accessToken=${accessToken}&expand=${expand}`;
+// url = `${appURL}${board}/${crs}/${filterType}/filterStationName/
+// ${numRows}?accessToken=${accessToken}&expand=${expand}`;
 var url_opts = `?accessToken=${accessToken}&expand=${expand}`
-
-var options = {
-  width: 5,             // number of digits
-  format: null,         // options for jquery.numberformatter, if loaded
-  align: 'right',       // aligns values to the left or right of display
-  padding: '&nbsp;',    // value to use for padding
-  chars_preset: 'alphanum',  // 'num', 'hexnum', 'alpha' or 'alphanum'
-  timing: 250,          // the maximum timing for digit animation
-  min_timing: 10,       // the minimum timing for digit animation
-  threshhold: 100,      // the point at which Flapper will switch from
-                        // simple to detailed animations
-  transform: true,      // Flapper automatically detects the jquery.transform
-                        // plugin. Set this to false if you want to force
-                        // transform to off
-  on_anim_start: null,  // Callback for start of animation
-  on_anim_end: null     // Callback for end of animation
-}
 
 var cheeseBoard = angular.module('cheeseBoard', []);
 
 cheeseBoard.controller('cheeseBoardController',
   function cheeseBoardController($scope, $interval) {
-  $scope.crs = "CBG";
-  $scope.board = "departure";
   $scope.resp = [];
-  // console.log(url);
 
   function arrayUnique(array) {
       var a = array.concat();
@@ -146,16 +115,15 @@ cheeseBoard.controller('cheeseBoardController',
     }
 
     for (var i in filterStationName) {
-      // url = `${appURL}${board}/${crs}/${filterType}/filterStationName/${numRows};
-
-      var new_url = [appURL, $scope.board, $scope.crs]
+      var new_url = [appURL, $scope.settings.board,
+                     $scope.settings.from.slice(-4,-1)]
       if (filterStationName[i] !== '') {
-        new_url.push(filterType, filterStationName[i]);
+        new_url.push(filterType, filterStationName[i].slice(-4,-1));
       }
-      new_url.push(numRows);
+      // new_url.push(numRows);
 
-      console.log(new_url);
-      $.get(new_url.join("/") + url_opts, function( data ) {
+      new_url = new_url.join("/") + url_opts;
+      $.get(new_url, function( data ) {
         if (data.trainServices != null) {
           new_resp = new_resp.concat(data.trainServices);
         }
@@ -164,9 +132,13 @@ cheeseBoard.controller('cheeseBoardController',
         if (result_count === filterStationName.length) {
           for (var i in new_resp) {
             var service = new_resp[i];
-            service.arrivalTime = service.subsequentCallingPoints[0].callingPoint[service.subsequentCallingPoints[0].callingPoint.length-1].st;
+            service.arrivalTime = service
+                                  .subsequentCallingPoints[0]
+                                  .callingPoint[service
+                                                  .subsequentCallingPoints[0]
+                                                  .callingPoint
+                                                  .length-1].st;
             service.destName = service.destination[0].locationName;
-            console.log(service.std, service.destName);
           }
 
           diffServices(new_resp);
@@ -203,7 +175,6 @@ cheeseBoard.controller('cheeseBoardController',
     return stnName;
   }
 
-  var row_per_page = 2;
   $scope.active_page = 0;
   $scope.active_page_inc = function() {
     $scope.active_page += 1;
@@ -229,12 +200,11 @@ cheeseBoard.controller('cheeseBoardController',
   }
 
   $scope.$watch("resp.length", function () {
-    $scope.num_pages = Math.ceil($scope.resp.length/row_per_page);
+    $scope.num_pages = Math.ceil($scope.resp.length/$scope.settings.rowPerPage);
   });
 
   $scope.showService = function (index) {
-    console.log();
-    return Math.floor(index/row_per_page) === $scope.active_page;
+    return Math.floor(index/$scope.settings.rowPerPage) === $scope.active_page;
   }
 
   var refreshPromise = undefined;
@@ -246,34 +216,17 @@ cheeseBoard.controller('cheeseBoardController',
   }
 
   $scope.save_settings = function (settings) {
-    $scope.settingsError = undefined;
-
-    if($scope.stationNames.indexOf($scope.settings.from)<0){
-      $scope.settings.from = "invalid";
-      $scope.settingsError = "From Station Name Invalid";
-      return;
-    }
-
-    for (var i in $scope.settings.destFilters) {
-      if($scope.settings.to !== '' && $scope.stationNames.indexOf($scope.settings.to)<0){
-        $scope.settings.to = "invalid";
-        $scope.settingsError = "To Station Name Invalid";
-        return;
-      }
-    }
+    console.log("set", settings);
 
     if($scope.settings.rowPerPage === null) {
-      $scope.settings.rowPerPage = row_per_page;
+      $scope.settings.rowPerPage = 4;
     }
 
     console.log(settings);
     localStorage.setItem('settings', JSON.stringify(settings));
     $('#myModal').modal('hide');
 
-    $scope.crs = $scope.settings.from.slice(-4,-1);
-    row_per_page = $scope.settings.rowPerPage;
-    $scope.board = $scope.settings.board;
-
+    $scope.active_page = 0;
     startRefresh();
   }
 
@@ -286,12 +239,13 @@ cheeseBoard.controller('cheeseBoardController',
   $scope.stationNames = [];
   $.get(appURL+"/"+"crs", function( data ) {
     for(var i in data){
-      $scope.stationNames[i] = data[i].stationName + " (" + data[i].crsCode + ")";
+      $scope.stationNames[i] = data[i].stationName +
+                               " (" + data[i].crsCode + ")";
     }
     $scope.initTypeAhead();
   });
 
-  localStorage.clear();
+  // localStorage.clear();
 
   if (localStorage.settings != undefined){
     $scope.settings = JSON.parse(localStorage.settings);
@@ -299,7 +253,7 @@ cheeseBoard.controller('cheeseBoardController',
   }
   else{
     $scope.settings = {};
-    $scope.settings.board = "departure";
+    $scope.settings.board = "departures";
     $scope.settings.rowPerPage = 4;
     $scope.settings.destFilters = [];
     $('#myModal').modal('show');
@@ -313,7 +267,8 @@ cheeseBoard.directive('crs', function() {
     scope: false,
     link: function(scope, elm, attrs, ctrl) {
       ctrl.$validators.crs = function(modelValue, viewValue) {
-        console.log(modelValue, viewValue, ctrl.$isEmpty(modelValue), scope.stationNameValid(modelValue));
+        console.log(modelValue, viewValue, ctrl.$isEmpty(modelValue),
+            scope.stationNameValid(modelValue));
         return ctrl.$isEmpty(modelValue) || scope.stationNameValid(modelValue);
       };
     }
