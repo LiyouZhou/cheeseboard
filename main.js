@@ -227,6 +227,7 @@ cheeseBoard.controller('cheeseBoardController',
     $('#myModal').modal('hide');
 
     $scope.active_page = 0;
+    $scope.num_pages = Math.ceil($scope.resp.length/$scope.settings.rowPerPage);
     startRefresh();
   }
 
