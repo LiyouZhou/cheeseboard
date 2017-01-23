@@ -117,6 +117,7 @@
                        autocomplete="off"
                        ng-model="settings.from"
                        name="from"
+                       ng-model-options="{ updateOn: 'blur'}"
                        crs>
               </div>
             </div>
@@ -135,6 +136,7 @@
                        ng-model="settings.destFilters[$index]"
                        ng-init="initTypeAhead()"
                        name="to{{$index}}"
+                       ng-model-options="{ updateOn: 'blur'}"
                        crs>
               </div>
               <button type="button" class="btn btn-default"
